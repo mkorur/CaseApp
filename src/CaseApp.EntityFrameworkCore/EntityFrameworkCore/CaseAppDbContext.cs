@@ -12,6 +12,9 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using CaseApp.Schools;
+using CaseApp.Collections;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 
 namespace CaseApp.EntityFrameworkCore
 {
@@ -51,7 +54,12 @@ namespace CaseApp.EntityFrameworkCore
         public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
 
         #endregion
-        
+
+        public DbSet<Candidates.Candidate> Candidaties { get; set; }
+        public DbSet<Collection> Collections { get; set; }
+        public DbSet<CollectionCandidate> CollectionCandidates { get; set; }
+        public DbSet<School> Schools { get; set; }
+
         public CaseAppDbContext(DbContextOptions<CaseAppDbContext> options)
             : base(options)
         {
@@ -75,12 +83,29 @@ namespace CaseApp.EntityFrameworkCore
 
             /* Configure your own tables/entities inside here */
 
-            //builder.Entity<YourEntity>(b =>
-            //{
-            //    b.ToTable(CaseAppConsts.DbTablePrefix + "YourEntities", CaseAppConsts.DbSchema);
-            //    b.ConfigureByConvention(); //auto configure for the base class props
-            //    //...
-            //});
+            builder.Entity<Candidates.Candidate>(b =>
+            {
+                b.ToTable("Candidaties");
+                b.ConfigureByConvention();
+                b.HasOne<School>().WithMany().HasForeignKey(x => x.SchoolId).IsRequired();
+            });
+            builder.Entity<Collection>(b =>
+            {
+                b.ToTable("Collections");
+                b.ConfigureByConvention();
+            });
+            builder.Entity<CollectionCandidate>(b =>
+            {
+                b.ToTable("CollectionCandidates");
+                b.ConfigureByConvention();
+                b.HasOne<Candidates.Candidate>().WithMany().HasForeignKey(x => x.CandidateId).IsRequired();
+                b.HasOne<CollectionCandidate>().WithMany().HasForeignKey(x => x.CollecionId).IsRequired();
+            });
+            builder.Entity<School>(b =>
+            {
+                b.ToTable("Schools");
+                b.ConfigureByConvention();
+            });
         }
     }
 }
